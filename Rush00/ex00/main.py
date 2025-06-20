@@ -3,7 +3,7 @@ from checkmate import checkmate
 
 def read_board(file_path):
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path, 'R') as f:
             lines = [line.rstrip('\n') for line in f if line.strip()]
             size = len(lines)
             if not lines or any(len(line) != size for line in lines):
