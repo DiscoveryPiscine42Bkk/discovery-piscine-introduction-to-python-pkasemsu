@@ -1,101 +1,65 @@
-def checkmate(*board):
-    if not board:
-        return "Fail"
+def is_in_check(board):
+    # First, we need to find the position of the King (denoted by 'K').
+    king_position = None
+    n = len(board)  # The size of the board (assuming a square board)
     
-    size = len(board)
-    if size == 0:
-        return "Fail"
-    
-    for row in board:
-        if len(row) != size:
-            return "Fail"
-    
-    king_pos = None
-    for i in range(size):
-        for j in range(size):
+    for i in range(n):
+        for j in range(n):
             if board[i][j] == 'K':
-                king_pos = (i, j)
+                king_position = (i, j)
                 break
-        if king_pos:
+        if king_position:
             break
     
-    if not king_pos:
-        return "Fail"
+    if not king_position:
+        # If we didn't find the King, return an error message.
+        return "Error: King not found"
+
+    kx, ky = king_position
+
+    # Directions for Rook and Queen (horizontal and vertical)
+    rook_directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    # Directions for Bishop and Queen (diagonal)
+    bishop_directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
+    # Directions for Pawn (attacks diagonally)
+    pawn_directions = [(-1, -1), (1, 1)]  # Attacking directions for White pawn
     
-    king_row, king_col = king_pos
-    
-    for i in range(size):
-        for j in range(size):
-            piece = board[i][j]
-            if piece in 'QRBNP':  
-                if can_attack(board, i, j, king_row, king_col, piece):
+    # Check for attacks from Rooks and Queens (vertical and horizontal)
+    for dx, dy in rook_directions:
+        x, y = kx + dx, ky + dy
+        while 0 <= x < n and 0 <= y < n:
+            if board[x][y] != '.':  # If we hit a piece
+                if board[x][y] == 'R' or board[x][y] == 'Q':
                     return "Success"
-    
+                break
+            x, y = x + dx, y + dy
+
+    # Check for attacks from Bishops and Queens (diagonal)
+    for dx, dy in bishop_directions:
+        x, y = kx + dx, ky + dy
+        while 0 <= x < n and 0 <= y < n:
+            if board[x][y] != '.':  # If we hit a piece
+                if board[x][y] == 'B' or board[x][y] == 'Q':
+                    return "Success"
+                break
+            x, y = x + dx, y + dy
+
+    # Check for attacks from Pawns (diagonal attacks)
+    for dx, dy in pawn_directions:
+        x, y = kx + dx, ky + dy
+        if 0 <= x < n and 0 <= y < n:
+            if board[x][y] == 'P':
+                return "Success"
+
     return "Fail"
-
-def can_attack(board, piece_row, piece_col, king_row, king_col, piece):
-    size = len(board)
-    
-    if piece == 'P':  
-        if piece_row + 1 == king_row and abs(piece_col - king_col) == 1:
-            return True
-    
-    elif piece == 'R':
-        if piece_row == king_row or piece_col == king_col:
-            return is_clear_path(board, piece_row, piece_col, king_row, king_col)
-    
-    elif piece == 'B':  
-        if abs(piece_row - king_row) == abs(piece_col - king_col):
-            return is_clear_path(board, piece_row, piece_col, king_row, king_col)
-    
-    elif piece == 'Q':  
-       if (piece_row == king_row or piece_col == king_col or 
-            abs(piece_row - king_row) == abs(piece_col - king_col)):
-            return is_clear_path(board, piece_row, piece_col, king_row, king_col)
-    
-    elif piece == 'N':  
-        dr = abs(piece_row - king_row)
-        dc = abs(piece_col - king_col)
-        if (dr == 2 and dc == 1) or (dr == 1 and dc == 2):
-            return True
-    
-    return False
-
-def is_clear_path(board, start_row, start_col, end_row, end_col):
-    dr = 0 if start_row == end_row else (1 if end_row > start_row else -1)
-    dc = 0 if start_col == end_col else (1 if end_col > start_col else -1)
-    
-    curr_row, curr_col = start_row + dr, start_col + dc
-    
-    while curr_row != end_row or curr_col != end_col:
-        if board[curr_row][curr_col] != '.' and board[curr_row][curr_col] != ' ':
-            return False
-        curr_row += dr
-        curr_col += dc
-    
-    return True
-
-if __name__ == "__main__":
-    board1 = [
-        "...K....",
-        "........",
-        "........",
-        "........",
-        "........",
-        "........",
-        "........",
-        ".....Q.."
-    ]
-    print(checkmate(*board1))  
-    
-    board2 = [
-        "...K....",
-        "........",
-        ".B......",
-        "........",
-        "........",
-        "........",
-        "........",
-        ".....Q.."
-    ]
-    print(checkmate(*board2))
+board1 = [
+    ['.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', 'K', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', 'P', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.'],
+    ['.', '.', '.', '.', '.', '.', '.', '.']
+]
+print(is_in_check(board1))
